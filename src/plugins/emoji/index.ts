@@ -73,6 +73,13 @@ Config.prototype.controls.emoji = {
 			<a href="javascript:void(0);" data-category="flags"      title="${editor.i18n(categories.flags)}"      >&nbsp;</a>
 		`;
 
+		const $filterInput = editor.create.fromHTML(`<input type="text" id="filter" placeholder="${editor.i18n('Filter')}">`);
+		const $filterReset = editor.create.fromHTML(`<button type="reset">${editor.i18n('Clear')}</button>`);
+
+		const $filter = editor.create.fromHTML(`<form class="oho-jodit_emoji_filter"></form>`);
+					$filter.appendChild($filterInput);
+					$filter.appendChild($filterReset);
+
 		setTimeout(() => {
 			const captions = $collection.querySelectorAll(".oho-jodit_emoji_caption");
 
@@ -136,8 +143,54 @@ Config.prototype.controls.emoji = {
  	    e.preventDefault();
  		});
 
+  	const filterItems = (groupSelector: string, itemSelector: string, attribute: string, query: string) => {
+      const regex = new RegExp('\\b\\w*' + query + '\\w*\\b');
+
+      const items  = document.querySelectorAll(itemSelector);
+      const groups = document.querySelectorAll(groupSelector);
+
+      Array.prototype.filter.call(items, ($item) => {
+   			if (regex.test($item.getAttribute(attribute))) {
+   				$item.classList.remove('_hidden');
+   			}
+   			else {
+   				$item.classList.add('_hidden');
+   			}
+      });
+
+      Array.prototype.filter.call(groups, ($group) => {
+      	const display = $group.querySelectorAll(':not(._hidden)').length ? 'flex' : 'none';
+
+      	$group.style.display = display;
+      	$group.previousElementSibling.style.display = display;
+      });
+  	}
+
+		editor.events.on($filterInput, 'keyup', (e: MouseEvent) => {
+			const query = (<HTMLInputElement>e.target).value.trim();
+
+			if (query.length) {
+				$navigation.classList.add('_disabled');
+				$filterReset.classList.add('_visible');
+			}
+			else {
+				$navigation.classList.remove('_disabled');
+				$filterReset.classList.remove('_visible');
+			}
+
+     	filterItems('.oho-jodit_emoji_group', '.oho-jodit_emoji_item', 'data-id', query);
+    });
+
+		editor.events.on($filterReset, 'click', (e: MouseEvent) => {
+			$navigation.classList.remove('_disabled');
+			$filterReset.classList.remove('_visible');
+
+     	filterItems('.oho-jodit_emoji_group', '.oho-jodit_emoji_item', 'data-id', '');
+    });
+
 		$popupHtml = editor.create.div('oho-jodit_emoji_popup jodit_tabs');
 		$popupHtml.appendChild($navigation);
+		$popupHtml.appendChild($filter);
 		$popupHtml.appendChild($collection);
 
 		return $popupHtml;

@@ -12,6 +12,13 @@
 
 		&_nav {
 	    display: flex;
+	    opacity: 1;
+	    transition: opacity 321ms;
+
+	    &._disabled {
+				opacity: .5;
+				pointer-events: none;
+	    }
 
 			a {
 				flex: 1;
@@ -54,6 +61,43 @@
 				// &.jodit_emoji_objects {  &:before { background-position: -21px -21px; }}
 				// &.jodit_emoji_symbols {  &:before { background-position: -42px -21px; }}
 				// &.jodit_emoji_flags {    &:before { background-position: -63px -21px; }}
+			}
+		}
+
+		&_filter {
+			display: flex;
+			position: relative;
+			margin-bottom: 5px;
+
+			input {
+				flex: 1;
+				padding: 2px 50px 1px 2px;
+				font-size: 13px;
+			}
+
+			button {
+		    position: absolute;
+		    height: calc(100% - 6px);
+		    right: 3px;
+		    top: 3px;
+		    border: none;
+				background: transparent;
+		    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.75);
+		    font-size: 12px;
+		    cursor: pointer;
+		    opacity: .25;
+		    pointer-events: none;
+		    transition: opacity 321ms;
+
+		    &._visible {
+		    	opacity: 0.7;
+		    	pointer-events: all;
+		    	transition-timing-function: ease-out;
+		    }
+
+		    &:hover {
+		    	opacity: 1;
+		    }
 			}
 		}
 
@@ -105,6 +149,14 @@
 
 			&:hover {
 				background-color: hsla(0, 0%, 93%, 1);
+			}
+
+			&._empty {
+				visibility: hidden;
+			}
+
+			&._hidden {
+				display: none;
 			}
 		}
 
