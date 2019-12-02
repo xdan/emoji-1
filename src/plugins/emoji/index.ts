@@ -26,15 +26,27 @@ const categories: IEmojiCategories = {
 	flags:      'Flags',
 }
 
-let $popupHtml: HTMLDivElement;
-
+let $popupHtml:  HTMLDivElement;
+let $rangeSave:  Range;
 
 Config.prototype.controls.emoji = {
 	tooltip: 'Insert Emoji',
 	iconURL: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAwIDEwMDAiIGNsYXNzPSJqb2RpdF9pY29uIGpvZGl0X2ljb25fZW1vamkiPjxwYXRoIGQ9Ik01MDAsOTkwQzIyOS44LDk5MCwxMCw3NzAuMiwxMCw1MDBDMTAsMjI5LjgsMjI5LjgsMTAsNTAwLDEwYzI3MC4yLDAsNDkwLDIxOS44LDQ5MCw0OTBTNzcwLjIsOTkwLDUwMCw5OTB6IE01MDAsODBDMjY4LjQsODAsODAsMjY4LjQsODAsNTAwczE4OC40LDQyMCw0MjAsNDIwYzIzMS42LDAsNDIwLTE4OC40LDQyMC00MjBTNzMxLjYsODAsNTAwLDgweiBNNTAxLjIsNzg1LjhjLTk3LjUsMC0xODgtNDQuMS0yNDguMi0xMjFjLTExLjktMTUuMi05LjItMzcuMiw2LTQ5LjFjMTUuMi0xMS45LDM3LjItOS4zLDQ5LjEsNmM0Ni44LDU5LjgsMTE3LjIsOTQuMSwxOTMuMSw5NC4xYzc2LjcsMCwxNDcuNS0zNC45LDE5NC4zLTk1LjhjMTEuOC0xNS4zLDMzLjctMTguMiw0OS4xLTYuNGMxNS4zLDExLjgsMTguMiwzMy44LDYuNCw0OS4xQzY5MC44LDc0MSw1OTkuNyw3ODUuOCw1MDEuMiw3ODUuOEw1MDEuMiw3ODUuOHogTTM0My43LDUwMy41Yy0yOSwwLTUyLjUtMjMuNS01Mi41LTUyLjV2LTcwYzAtMjksMjMuNS01Mi41LDUyLjUtNTIuNXM1Mi41LDIzLjUsNTIuNSw1Mi41djcwQzM5Ni4yLDQ4MCwzNzIuNiw1MDMuNSwzNDMuNyw1MDMuNXogTTY1OC43LDUwMy41Yy0yOSwwLTUyLjUtMjMuNS01Mi41LTUyLjV2LTcwYzAtMjksMjMuNS01Mi41LDUyLjUtNTIuNWMyOSwwLDUyLjUsMjMuNSw1Mi41LDUyLjV2NzBDNzExLjIsNDgwLDY4Ny42LDUwMy41LDY1OC43LDUwMy41eiI+PC9wYXRoPjwvc3ZnPgo=',
 
 	popup: (editor: IJodit, current: (Node | false), control:  IControlType, close: () => void, button: IToolbarButton) => {
+		editor.events.fire('showEmojiPopup');
+
 		if ($popupHtml) {
+			let $activeNav: HTMLElement | null = $popupHtml.querySelector('a.active');
+			if ($activeNav) {
+				$activeNav.classList.remove('active');
+			}
+
+			let $defaultNav: HTMLElement | null = $popupHtml.querySelector('[data-category="people"]');
+			if ($defaultNav) {
+				$defaultNav.classList.add('active');
+			}
+
 			return $popupHtml;
 		}
 
@@ -137,9 +149,13 @@ Config.prototype.controls.emoji = {
  				return;
  			}
 
+			// editor.selection.focus();
+			editor.selection.selectRange($rangeSave);
  			editor.selection.insertHTML(`<span>${target.innerHTML}</span>`);
 
- 			// close();
+ 			$rangeSave = editor.selection.range;
+
+			// close();
  	    e.preventDefault();
  		});
 
@@ -188,10 +204,7 @@ Config.prototype.controls.emoji = {
      	filterItems('.oho-jodit_emoji_group', '.oho-jodit_emoji_item', 'data-id', '');
     });
 
-		$popupHtml = editor.create.div('oho-jodit_emoji_popup jodit_tabs');
-		$popupHtml.appendChild($navigation);
-		$popupHtml.appendChild($filter);
-		$popupHtml.appendChild($collection);
+		$popupHtml = editor.create.div('oho-jodit_emoji_popup jodit_tabs', [$navigation, $filter, $collection]);
 
 		return $popupHtml;
 	}
@@ -203,4 +216,8 @@ Config.prototype.controls.emoji = {
  *
  * @param {Jodit} editor
  */
-export function emoji(editor: IJodit) {}
+export function emoji(editor: IJodit) {
+	editor.events.on('showEmojiPopup', () => {
+		$rangeSave = editor.selection.range;
+	});
+}
